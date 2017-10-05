@@ -1,0 +1,28 @@
+{
+    "name": "mingalevme/illuminate-google",
+    "description": "Provides Google API Library for PHP wrapper for Laravel/Lumen",
+    "keywords": [
+        "laravel",
+        "lumen",
+        "google",
+        "google-api"
+    ],
+    "homepage": "https://github.com/mingalevme/illuminate-google",
+    "license": "Apache License 2.0",
+    "authors": [
+        {
+            "name": "Mingalev Mikhail",
+            "email": "mingalevme@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "google/apiclient": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mingalevme\\Illuminate\\Google\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
