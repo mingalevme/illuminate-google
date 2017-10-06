@@ -17,6 +17,7 @@ trait PackageTest
         putenv('GOOGLE_SERVICE=Google_Service_Drive');
         putenv('GOOGLE_SCOPE=Google_Service_Drive');
         
+        $this->app['config']->set('google', require __DIR__.'/../config/google.php');
         $this->app['google.config']->set('services.default.auth', [
             'type' => 'service_account',
             'client_id' => 'client_id',
