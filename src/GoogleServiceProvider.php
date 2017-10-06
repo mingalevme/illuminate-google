@@ -2,38 +2,11 @@
 
 namespace Mingalevme\Illuminate\Google;
 
+use Illuminate\Config\Repository;
 use Illuminate\Support\ServiceProvider;
 
-class GoogleServiceProvider extends ServiceProvider
+abstract class GoogleServiceProvider extends ServiceProvider
 {
-    /**
-     * Configured?
-     * 
-     * @var mixed
-     */
-    protected $isConfigured = -1;
-
-    /**
-     * Merge the given configuration with the existing configuration.
-     *
-     * @param  string  $path
-     * @param  string  $key
-     * @return void
-     */
-    protected function mergeConfigFrom($path, $key)
-    {
-        if ($this->isConfigured === -1) {
-            if ($this->app->getConfigurationPath('google')) {
-                return ($this->isConfigured = $this->app->configure('google'));
-            } else {
-                return ($this->isConfigured = parent::mergeConfigFrom($path, $key));
-            }
-        } else {
-            return $this->isConfigured;
-        }
-    }
-    
-    
     /**
      * Register the service provider.
      *
@@ -41,13 +14,17 @@ class GoogleServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton('google.config', function ($app) {
+            return $app['config']['google']
+                    ? new Repository($app['config']['google'])
+                    : new Repository(require __DIR__.'/../config/google.php');
+        });
+        
         $this->app->singleton('google', function ($app) {
-            $this->mergeConfigFrom(__DIR__.'/../config/google.php', 'google');
             return new GoogleManager($app);
         });
 
         $this->app->singleton('google.service', function ($app) {
-            $this->mergeConfigFrom(__DIR__.'/../config/google.php', 'google');
             return $app['google']->service();
         });
     }
@@ -55,13 +32,7 @@ class GoogleServiceProvider extends ServiceProvider
     /**
      * Boot the service provider.
      */
-    public function boot()
-    {
-        $this->publishes([
-            __DIR__ . '/../config/google.php'
-                => $this->app->basePath() . '/config/google.php',
-        ], 'config');
-    }
+    abstract public function boot();
 
     /**
      * Get the services provided by the provider.

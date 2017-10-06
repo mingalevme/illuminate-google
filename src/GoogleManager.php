@@ -3,7 +3,6 @@
 namespace Mingalevme\Illuminate\Google;
 
 use InvalidArgumentException;
-use Illuminate\Support\Facades\Cache;
 
 class GoogleManager
 {
@@ -30,7 +29,6 @@ class GoogleManager
     public function __construct($app)
     {
         $this->app = $app;
-        $this->app->configure('google');
     }
 
     /**
@@ -54,7 +52,7 @@ class GoogleManager
      */
     protected function get($name)
     {
-        return $this->services[$name] ?? $this->resolve($name);
+        return isset($this->services[$name]) ? $this->services[$name] : $this->resolve($name);
     }
 
     /**
@@ -73,6 +71,10 @@ class GoogleManager
             throw new InvalidArgumentException("Google service \"{$name}\" is not defined.");
         }
         
+        if (!array_get($config, 'service')) {
+            throw new InvalidArgumentException("Invalid service provided for Google service \"{$name}\"");
+        }
+        
         $client = new \Google_Client((array) array_get($config, 'extra'));
         
         if (array_get($config, 'auth')) {
@@ -87,41 +89,9 @@ class GoogleManager
             }
         }
         
-        //$this->setAccessToken($client, $config);
-        
         $service = $this->app->make($config['service'], ['client' => $client]);
         
         return $service;
-    }
-    
-    /**
-     * 
-     * @param array $config
-     */
-    protected function setAccessToken(\Google_Client $client, array $config)
-    {
-        if (array_get($config, 'cache.is_enabled')) {
-            $key = $this->generateCacheKey($config);
-            $store = Cache::store(array_get($config, 'cache.store'));
-            $token = $store->get($key);
-            if ($token) {
-                $client->setAccessToken($token);
-            } else {
-                $client->refreshTokenWithAssertion();
-                $token = $client->getAccessToken();
-                $store->put($key, $token, ceil(array_get($token, 'expires_in', 3600) / 60));
-            }
-        }
-    }
-    
-    /**
-     * 
-     * @param array $config
-     * @return string
-     */
-    protected function generateCacheKey(array $config)
-    {
-        return md5(json_encode($config));
     }
 
     /**
@@ -132,7 +102,7 @@ class GoogleManager
      */
     protected function getConfig($name)
     {
-        return $this->app['config']["google.services.{$name}"];
+        return array_get($this->app['google.config'], "services.{$name}");
     }
 
     /**
@@ -142,7 +112,7 @@ class GoogleManager
      */
     public function getDefaultDriver()
     {
-        return $this->app['config']['google.default'];
+        return $this->app['google.config']['default'];
     }
 
     /**

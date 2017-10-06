@@ -48,7 +48,7 @@ return [
              * Scopes to set to Google_Client
              */
             'scopes' => [
-                env('GOOGLE_SCOPE', 'https://www.googleapis.com/auth/analytics'),
+                env('GOOGLE_SCOPE'),
             ],
             
             /**
