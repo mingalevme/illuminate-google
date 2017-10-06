@@ -2,6 +2,7 @@
 
 namespace Mingalevme\Tests\Illuminate\Google;
 
+use Mingalevme\Illuminate\Google\GoogleManager;
 use Mingalevme\Illuminate\Google\Facades\Google;
 
 trait PackageTest
@@ -21,7 +22,7 @@ trait PackageTest
             'private_key' => 'private_key',
         ]);
         
-        $manager = Google::getFacadeRoot();
+        $manager = new GoogleManager($this->app);
         
         $service = $manager->service();
         
@@ -34,8 +35,15 @@ trait PackageTest
     public function testGetServiceWithDrive()
     {
         putenv('GOOGLE_KEY_PATH=');
-        $service = Google::service('analytics');
+        $service = (new GoogleManager($this->app))->service('analytics');
         $this->assertInstanceOf('Google_Service_Analytics', $service);
+    }
+    
+    public function testFacade()
+    {
+        putenv('GOOGLE_SCOPE=Google_Service_Drive');
+        putenv('GOOGLE_SERVICE=Google_Service_Drive');
+        $this->assertInstanceOf('Google_Client', Google::getClient());
     }
     
     public function tearDown()
