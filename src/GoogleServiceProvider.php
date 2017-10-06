@@ -42,7 +42,7 @@ abstract class GoogleServiceProvider extends ServiceProvider
     public function provides()
     {
         return [
-            'google', 'google.service',
+            'google', 'google.service', 'google.config',
         ];
     }
 }
