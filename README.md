@@ -12,7 +12,7 @@ Provides  Google API Library for PHP wrapper for Laravel/Lumen
 'Google' => Mingalevme\Illuminate\Google\Facades\Google::class,
 ```
 
-4. *(Optionally)* For **Larvel** run
+4. *(Optionally)* For **Laravel** run
 ```php
 php artisan vendor:publish --provider="Mingalevme\Illuminate\Google\GoogleServiceProvider" --tag="config"
 ``` 

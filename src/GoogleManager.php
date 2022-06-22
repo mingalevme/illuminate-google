@@ -2,6 +2,7 @@
 
 namespace Mingalevme\Illuminate\Google;
 
+use Google_Client;
 use InvalidArgumentException;
 
 class GoogleManager
@@ -19,7 +20,7 @@ class GoogleManager
      * @var array
      */
     protected $services = [];
-    
+
     /**
      * Create a new Google manager instance.
      *
@@ -40,7 +41,7 @@ class GoogleManager
     public function service($name = null)
     {
         $name = $name ?: $this->getDefaultDriver();
-        
+
         return $this->services[$name] = $this->get($name);
     }
 
@@ -66,43 +67,54 @@ class GoogleManager
     protected function resolve($name)
     {
         $config = $this->getConfig($name);
-        
+
         if (is_null($config)) {
             throw new InvalidArgumentException("Google service \"{$name}\" is not defined.");
         }
-        
-        if (!array_get($config, 'service')) {
+
+        if (empty($config['service'])) {
             throw new InvalidArgumentException("Invalid service provided for Google service \"{$name}\"");
         }
-        
-        $client = new \Google_Client((array) array_get($config, 'extra'));
-        
-        if (array_get($config, 'auth')) {
+
+        $extra = !empty($config['extra'])
+            ? (array)$config['extra']
+            : [];
+
+        $client = new Google_Client($extra);
+
+        if (!empty($config['auth'])) {
             $client->setAuthConfig($config['auth']);
         }
-        
-        foreach ((array) array_get($config, 'scopes') as $scope) {
+
+        $scopes = !empty($config['scopes'])
+            ? (array)$config['scopes']
+            : [];
+
+        foreach ($scopes as $scope) {
             if (!$scope) {
-                throw new InvalidArgumentException("Invalid scope provided for Google service \"{$name}\"");
+                throw new InvalidArgumentException("Invalid scope provided for Google service \"$name\"");
             } else {
                 $client->addScope($scope);
             }
         }
-        
+
         $service = $this->app->make($config['service'], ['client' => $client]);
-        
+
         return $service;
     }
 
     /**
-     * Get the google service configuration.
+     * Get the Google service configuration.
      *
      * @param  string  $name
-     * @return array
+     * @return array|null
      */
     protected function getConfig($name)
     {
-        return array_get($this->app['google.config'], "services.{$name}");
+        if (isset($this->app['google.config']['services'][$name])) {
+            return $this->app['google.config']['services'][$name];
+        }
+        return null;
     }
 
     /**
